@@ -1,5 +1,5 @@
 import { Button, FormControl, Input, InputLabel } from '@mui/material';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import './App.css';
 import db from './firebase';
@@ -10,14 +10,9 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [username, setUsername] = useState('');
 
-  // useEffect(() => {
-	// 	db.collection('messages').onSnapshot(snapshot => {
-	// 		setMessages(snapshot.docs.map(doc => doc.data()))
-	// 	})
-  // }, [])
-
   useEffect(() => {
-    onSnapshot(collection(db, "messages"), (snapshot) => 
+    const q = query(collection(db, "messages"), orderBy("timestamp", 'desc'))
+    onSnapshot(q , (snapshot) => 
       setMessages(snapshot.docs.map((doc) => doc.data()))
     );
   }, [])
@@ -26,9 +21,15 @@ function App() {
     setUsername(prompt('Please enter your name'));
   }, [])
   
-  const sendMessage = (event) => {
+  const sendMessage = async (event) => {
     event.preventDefault();
-    setMessages([...messages, {username: username, message: input}]);
+
+    await addDoc(collection(db, "messages"), {
+      message: input,
+      username: username,
+      timestamp: serverTimestamp()
+    });
+
     setInput('');
   }
 
@@ -39,7 +40,7 @@ function App() {
 
       <form>
         <FormControl>
-          <InputLabel>Email a message...</InputLabel>
+          <InputLabel>Enter a message...</InputLabel>
           <Input value = { input } onChange = { event => setInput(event.target.value)} />
           <Button disabled = {!input} variant = "contained" color = "primary" type = 'submit' onClick = { sendMessage }>Send Message</Button>
         </FormControl>
