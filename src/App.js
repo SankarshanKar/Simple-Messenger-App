@@ -55,11 +55,14 @@ function App() {
       <form className="app__form">
         <FormControl className="app__formControl">
           <Input
+            className="app__input"
             placeholder="Enter a message..."
             value={input}
             onChange={(event) => setInput(event.target.value)}
           />
-          <IconButton disabled={!input}
+          <IconButton 
+            className="app__iconButton"
+            disabled={!input}
             variant="contained"
             color="primary"
             type="submit"
